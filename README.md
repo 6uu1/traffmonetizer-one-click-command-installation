@@ -25,14 +25,14 @@ It has below features:
 ## Notes
 
 - Verified on AMD64 and ARM
-- Try it if you are interested via my --> [referrals](https://traffmonetizer.com/?aff=247346) <--, you will get 5 dollar.
+- Try it if you are interested via my --> [referrals](https://traffmonetizer.com/?aff=986423) <--, you will get 5 dollar.
 
 ## Install
 
 ### Interactive installation
 
 ```shell
-curl -L https://raw.githubusercontent.com/spiritLHLS/traffmonetizer-one-click-command-installation/main/tm.sh -o tm.sh && chmod +x tm.sh && bash tm.sh
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm.sh -o tm.sh && chmod +x tm.sh && bash tm.sh
 ```
 
 After the registration link is registered, copy the token in the upper left corner, run my script, paste the token, and press Enter to start the installation.
@@ -40,7 +40,7 @@ After the registration link is registered, copy the token in the upper left corn
 ### One command installation
 
 ```shell
-curl -L https://raw.githubusercontent.com/spiritLHLS/traffmonetizer-one-click-command-installation/main/tm.sh -o tm.sh && chmod +x tm.sh && bash tm.sh -t ViRrn6FZQsfgmE9pjmyAPsEM7UD6epqMb4zcJ3WtQYk=
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm.sh -o tm.sh && chmod +x tm.sh && bash tm.sh -t ViRrn6FZQsfgmE9pjmyAPsEM7UD6epqMb4zcJ3WtQYk=
 ```
 
 Change to your token at the end of this command
@@ -61,9 +61,9 @@ It is estimated that there will be more in the United States. The daily income o
 
 **More monks and less porridge, the more people, the lower the income**
 
-![](https://raw.githubusercontent.com/spiritLHLS/traffmonetizer-one-click-command-installation/main/backup/a.png)
+![](https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/backup/a.png)
 
-![](https://raw.githubusercontent.com/spiritLHLS/traffmonetizer-one-click-command-installation/main/backup/b.png)
+![](https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/backup/b.png)
 
 ## Disclaimer
 
