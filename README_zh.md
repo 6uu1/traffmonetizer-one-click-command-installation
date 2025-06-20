@@ -27,7 +27,7 @@ traffmonetizer 是一个允许用户通过分享流量来赚钱的平台。(被�
 ### 交互式安装
 
 ```shell
-curl -L https://raw.githubusercontent.com/spiritLHLS/traffmonetizer-one-click-command-installation/main/tm.sh -o tm.sh && chmod +x tm.sh && bash tm.sh
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm.sh -o tm.sh && chmod +x tm.sh && bash tm.sh
 ```
 
 注册链接注册后，复制左上角的token，运行此命令，粘贴token，回车，即可开始安装。
@@ -35,7 +35,7 @@ curl -L https://raw.githubusercontent.com/spiritLHLS/traffmonetizer-one-click-co
 ### 一键安装
 
 ```shell
-curl -L https://raw.githubusercontent.com/spiritLHLS/traffmonetizer-one-click-command-installation/main/tm.sh -o tm.sh && chmod +x tm.sh && bash tm.sh -t ViRrn6FZQsfgmE9pjmyAPsEM7UD6epqMb4zcJ3WtQYk=
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm.sh -o tm.sh && chmod +x tm.sh && bash tm.sh -t ViRrn6FZQsfgmE9pjmyAPsEM7UD6epqMb4zcJ3WtQYk=
 ```
 
 在此命令的最后更改为你的token
@@ -50,17 +50,17 @@ bash tm.sh -u
 
 ### 经验
 
-单IP挂国外，欧洲区日入0.010~0.015美元，美区估计会多点，单IP每日0.013以上不超过0.016吧。
+单IP挂国外，欧洲区日收入0.010~0.015美元，美区估计会多点，单IP每天0.013以上不超过0.016吧。
 
 **僧多粥少，人越多，收益越低**
 
-![](https://raw.githubusercontent.com/spiritLHLS/traffmonetizer-one-click-command-installation/main/backup/a.png)
+![](https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/backup/a.png)
 
-![](https://raw.githubusercontent.com/spiritLHLS/traffmonetizer-one-click-command-installation/main/backup/b.png)
+![](https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/backup/b.png)
 
 2022.05 末尾就大幅度减少收益了，之前一天有0.025美元以上的。(本脚本在平台适配了linux的第15天创建)
 
-注意，该项目提款前不要随意更换提款方式，因为提款方式切换可能会损失掉部分积攒的额度
+注意，该项目提现前不要随意更换提现方式，因为提现方式切换可能会损失掉部分积攒的额度
 
 ### 免责声明
 
