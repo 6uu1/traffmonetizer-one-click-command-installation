@@ -1,5 +1,15 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #FROM https://github.com/spiritLHLS/traffmonetizer-one-click-command-installation
+
+# Alpine 默认没有 bash，如果当前不是 bash 则自动安装并重新执行
+if [ -z "$BASH_VERSION" ]; then
+  if [ -f /etc/alpine-release ]; then
+    apk add --no-cache bash >/dev/null 2>&1
+    exec bash "$0" "$@"
+  else
+    echo "This script requires bash." && exit 1
+  fi
+fi
 
 utf8_locale=$(locale -a 2>/dev/null | grep -i -m 1 -E "UTF-8|utf8")
 if [[ -z "$utf8_locale" ]]; then
@@ -36,17 +46,24 @@ check_operating_system(){
 
   for i in "${CMD[@]}"; do SYS="$i" && [[ -n $SYS ]] && break; done
 
-  REGEX=("debian" "ubuntu" "raspbian" "centos|red hat|kernel|oracle linux|amazon linux|alma|rocky")
-  RELEASE=("Debian" "Ubuntu" "Raspbian" "CentOS")
-  PACKAGE_UPDATE=("apt -y update" "apt -y update" "apt -y update" "yum -y update")
-  PACKAGE_INSTALL=("apt -y install" "apt -y install" "apt -y install" "yum -y install")
-  PACKAGE_UNINSTALL=("apt -y autoremove" "apt -y autoremove" "apt -y autoremove" "yum -y autoremove")
+  REGEX=("debian" "ubuntu" "raspbian" "centos|red hat|kernel|oracle linux|amazon linux|alma|rocky" "alpine")
+  RELEASE=("Debian" "Ubuntu" "Raspbian" "CentOS" "Alpine")
+  PACKAGE_UPDATE=("apt -y update" "apt -y update" "apt -y update" "yum -y update" "apk update")
+  PACKAGE_INSTALL=("apt -y install" "apt -y install" "apt -y install" "yum -y install" "apk add")
+  PACKAGE_UNINSTALL=("apt -y autoremove" "apt -y autoremove" "apt -y autoremove" "yum -y autoremove" "apk del")
 
   for ((int = 0; int < ${#REGEX[@]}; int++)); do
     [[ $(echo "$SYS" | tr '[:upper:]' '[:lower:]') =~ ${REGEX[int]} ]] && SYSTEM="${RELEASE[int]}" && break
   done
 
   [[ -z $SYSTEM ]] && red " ERROR: The script supports Debian, Ubuntu, CentOS or Alpine systems only.\n" && exit 1
+}
+
+# 安装基础依赖
+install_base_deps(){
+  if [ "$SYSTEM" = "Alpine" ]; then
+    apk add --no-cache curl >/dev/null 2>&1
+  fi
 }
 
 # 判断宿主机的 IPv4 或双栈情况 没有拉取不了 docker
@@ -59,9 +76,10 @@ check_ipv4(){
   for p in "${API_NET[@]}"; do
     # 使用 curl 请求每个 API 服务商
     response=$(curl -s4m8 "$p")
+    curl_exit=$?
     sleep 1
     # 检查请求是否失败，或者回传内容中是否包含 error
-    if [ $? -eq 0 ] && ! echo "$response" | grep -q "error"; then
+    if [ $curl_exit -eq 0 ] && ! echo "$response" | grep -q "error"; then
       # 如果请求成功且不包含 error，则设置 IP_API 并退出循环
       IP_API="$p"
       break
@@ -91,13 +109,17 @@ input_token(){
 container_build(){
   # 宿主机安装 docker
   green "\n Install docker.\n "
-  if ! systemctl is-active docker >/dev/null 2>&1; then
-    echo -e " \n Install docker \n " 
-    if [ $SYSTEM = "CentOS" ]; then
+  if ! docker info >/dev/null 2>&1; then
+    echo -e " \n Install docker \n "
+    if [ "$SYSTEM" = "CentOS" ]; then
       ${PACKAGE_INSTALL[int]} yum-utils
       yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo &&
       ${PACKAGE_INSTALL[int]} docker-ce docker-ce-cli containerd.io
       systemctl enable --now docker
+    elif [ "$SYSTEM" = "Alpine" ]; then
+      ${PACKAGE_INSTALL[int]} docker docker-cli-compose
+      rc-update add docker default
+      service docker start
     else
       ${PACKAGE_INSTALL[int]} docker.io
     fi
@@ -226,6 +248,7 @@ done
 # 主程序
 check_root
 check_operating_system
+install_base_deps
 check_ipv4
 check_virt
 input_token
