@@ -204,16 +204,44 @@ show_vps_info(){
   CPU_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null)
   [ -n "$CPU_CORES" ] && yellow " CPU 核心数: $CPU_CORES\n"
   
-  # 内存大小
+  # 内存信息（详细）
   if command -v free &>/dev/null; then
-    TOTAL_MEM=$(free -m 2>/dev/null | grep Mem | awk '{print $2}')
-    [ -n "$TOTAL_MEM" ] && yellow " 总内存    : ${TOTAL_MEM} MB\n"
+    MEM_INFO=$(free -m 2>/dev/null | grep Mem)
+    TOTAL_MEM=$(echo "$MEM_INFO" | awk '{print $2}')
+    USED_MEM=$(echo "$MEM_INFO" | awk '{print $3}')
+    FREE_MEM=$(echo "$MEM_INFO" | awk '{print $4}')
+    AVAIL_MEM=$(echo "$MEM_INFO" | awk '{print $7}')
+    
+    if [ -n "$TOTAL_MEM" ]; then
+      yellow " 内存信息  : 总计 ${TOTAL_MEM} MB / 已用 ${USED_MEM} MB / 可用 ${AVAIL_MEM} MB\n"
+    fi
   fi
   
-  # 磁盘大小
+  # SWAP 信息
+  if command -v free &>/dev/null; then
+    SWAP_INFO=$(free -m 2>/dev/null | grep Swap)
+    TOTAL_SWAP=$(echo "$SWAP_INFO" | awk '{print $2}')
+    USED_SWAP=$(echo "$SWAP_INFO" | awk '{print $3}')
+    FREE_SWAP=$(echo "$SWAP_INFO" | awk '{print $4}')
+    
+    if [ -n "$TOTAL_SWAP" ] && [ "$TOTAL_SWAP" -gt 0 ]; then
+      yellow " SWAP 信息 : 总计 ${TOTAL_SWAP} MB / 已用 ${USED_SWAP} MB / 可用 ${FREE_SWAP} MB\n"
+    else
+      yellow " SWAP 信息 : 未配置 SWAP\n"
+    fi
+  fi
+  
+  # 磁盘信息（详细）
   if command -v df &>/dev/null; then
-    TOTAL_DISK=$(df -h / 2>/dev/null | tail -1 | awk '{print $2}')
-    [ -n "$TOTAL_DISK" ] && yellow " 总磁盘    : $TOTAL_DISK\n"
+    DISK_INFO=$(df -h / 2>/dev/null | tail -1)
+    TOTAL_DISK=$(echo "$DISK_INFO" | awk '{print $2}')
+    USED_DISK=$(echo "$DISK_INFO" | awk '{print $3}')
+    AVAIL_DISK=$(echo "$DISK_INFO" | awk '{print $4}')
+    USE_PERCENT=$(echo "$DISK_INFO" | awk '{print $5}')
+    
+    if [ -n "$TOTAL_DISK" ]; then
+      yellow " 磁盘信息  : 总计 ${TOTAL_DISK} / 已用 ${USED_DISK} / 可用 ${AVAIL_DISK} / 使用率 ${USE_PERCENT}\n"
+    fi
   fi
   
   # 内核版本
@@ -225,6 +253,16 @@ show_vps_info(){
     IPV4_ADDR=$(curl -s4m8 "$IP_API" 2>/dev/null)
     [ -n "$IPV4_ADDR" ] && yellow " IPv4 地址 : $IPV4_ADDR\n"
   fi
+  
+  # IPv6 地址
+  IPV6_APIS=("https://api64.ipify.org" "https://v6.ident.me" "https://ipv6.icanhazip.com")
+  for ipv6_api in "${IPV6_APIS[@]}"; do
+    IPV6_ADDR=$(curl -s6m8 "$ipv6_api" 2>/dev/null)
+    if [ $? -eq 0 ] && [ -n "$IPV6_ADDR" ] && echo "$IPV6_ADDR" | grep -q ":"; then
+      yellow " IPv6 地址 : $IPV6_ADDR\n"
+      break
+    fi
+  done
   
   green " =========================================================\n"
 }
@@ -251,7 +289,7 @@ check_operating_system
 install_base_deps
 check_ipv4
 check_virt
+show_vps_info
 input_token
 container_build
 result
-show_vps_info
