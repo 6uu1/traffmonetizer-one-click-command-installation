@@ -117,6 +117,96 @@ result(){
   docker ps -a | grep -q "$NAME" && green " Install success.\n" || red " install fail.\n"
 }
 
+# 检测虚拟化类型
+detect_virtualization(){
+  VIRT_TYPE=""
+  
+  # 方法1: systemd-detect-virt (最可靠)
+  if command -v systemd-detect-virt &>/dev/null; then
+    VIRT_TYPE=$(systemd-detect-virt 2>/dev/null)
+    if [ "$VIRT_TYPE" = "none" ]; then
+      VIRT_TYPE="Bare Metal / 物理机"
+    fi
+    return
+  fi
+  
+  # 方法2: 检查 /proc/vz 目录 (OpenVZ)
+  if [ -d /proc/vz ]; then
+    VIRT_TYPE="OpenVZ"
+    return
+  fi
+  
+  # 方法3: lscpu 中的 Hypervisor vendor
+  if command -v lscpu &>/dev/null; then
+    VIRT_TYPE=$(lscpu 2>/dev/null | grep -i 'hypervisor vendor' | awk -F: '{print $2}' | xargs)
+    [ -n "$VIRT_TYPE" ] && return
+  fi
+  
+  # 方法4: /proc/cpuinfo 中的 hypervisor flag
+  if grep -q 'hypervisor' /proc/cpuinfo 2>/dev/null; then
+    VIRT_TYPE="VM (Unknown Type)"
+    return
+  fi
+  
+  # 方法5: dmidecode 获取系统制造商
+  if command -v dmidecode &>/dev/null; then
+    VIRT_TYPE=$(dmidecode -s system-product-name 2>/dev/null | head -1)
+    [ -n "$VIRT_TYPE" ] && return
+  fi
+  
+  # 如果都无法检测
+  VIRT_TYPE="Unknown"
+}
+
+# 显示 VPS 配置信息
+show_vps_info(){
+  green "\n ===================== VPS 配置信息 =====================\n"
+  
+  # 检测虚拟化类型
+  detect_virtualization
+  yellow " 虚拟化类型: $VIRT_TYPE\n"
+  
+  # 操作系统
+  yellow " 操作系统  : $SYS\n"
+  
+  # CPU 架构
+  yellow " CPU 架构  : $ARCHITECTURE\n"
+  
+  # CPU 型号
+  if [ -f /proc/cpuinfo ]; then
+    CPU_MODEL=$(grep -m 1 'model name' /proc/cpuinfo 2>/dev/null | cut -d: -f2 | xargs)
+    [ -n "$CPU_MODEL" ] && yellow " CPU 型号  : $CPU_MODEL\n"
+  fi
+  
+  # CPU 核心数
+  CPU_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null)
+  [ -n "$CPU_CORES" ] && yellow " CPU 核心数: $CPU_CORES\n"
+  
+  # 内存大小
+  if command -v free &>/dev/null; then
+    TOTAL_MEM=$(free -m 2>/dev/null | grep Mem | awk '{print $2}')
+    [ -n "$TOTAL_MEM" ] && yellow " 总内存    : ${TOTAL_MEM} MB\n"
+  fi
+  
+  # 磁盘大小
+  if command -v df &>/dev/null; then
+    TOTAL_DISK=$(df -h / 2>/dev/null | tail -1 | awk '{print $2}')
+    [ -n "$TOTAL_DISK" ] && yellow " 总磁盘    : $TOTAL_DISK\n"
+  fi
+  
+  # 内核版本
+  KERNEL_VER=$(uname -r 2>/dev/null)
+  [ -n "$KERNEL_VER" ] && yellow " 内核版本  : $KERNEL_VER\n"
+  
+  # IPv4 地址
+  if [ -n "$IP_API" ]; then
+    IPV4_ADDR=$(curl -s4m8 "$IP_API" 2>/dev/null)
+    [ -n "$IPV4_ADDR" ] && yellow " IPv4 地址 : $IPV4_ADDR\n"
+  fi
+  
+  green " =========================================================\n"
+}
+
 # 卸载
 uninstall(){
   docker rm -f $(docker ps -a | grep -w "$NAME" | awk '{print $1}')
@@ -141,3 +231,4 @@ check_virt
 input_token
 container_build
 result
+show_vps_info
