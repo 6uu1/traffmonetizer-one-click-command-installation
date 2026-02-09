@@ -112,15 +112,18 @@ container_build(){
   if ! docker info >/dev/null 2>&1; then
     echo -e " \n Install docker \n "
     if [ "$SYSTEM" = "CentOS" ]; then
+      ${PACKAGE_UPDATE[int]}
       ${PACKAGE_INSTALL[int]} yum-utils
       yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo &&
       ${PACKAGE_INSTALL[int]} docker-ce docker-ce-cli containerd.io
       systemctl enable --now docker
     elif [ "$SYSTEM" = "Alpine" ]; then
+      ${PACKAGE_UPDATE[int]}
       ${PACKAGE_INSTALL[int]} docker docker-cli-compose
       rc-update add docker default
       service docker start
     else
+      ${PACKAGE_UPDATE[int]}
       ${PACKAGE_INSTALL[int]} docker.io
     fi
   fi
