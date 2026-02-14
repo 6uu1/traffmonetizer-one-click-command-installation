@@ -23,6 +23,10 @@ usage() {
 说明:
   此脚本用于 LXC 环境，通过 Docker 拉取镜像并提取 traffmonetizer 二进制，
   然后创建并启动服务（systemd 或 OpenRC）。
+
+LXC/Alpine 内存不足时安装可能被系统 Kill（OOM）。建议：
+  - 为容器分配至少 512MB 内存，或
+  - 在容器内先添加 swap 后再运行本脚本（脚本在检测到低内存且无 swap 时会尝试自动创建临时 swap）。
 EOF
 }
 
@@ -95,14 +99,47 @@ restart_docker_service() {
   fi
 }
 
+# 检测可用内存（MB），无 /proc 时返回 0
+get_available_mem_mb() {
+  local avail
+  avail=$(awk '/MemAvailable:/ { print int($2/1024) }' /proc/meminfo 2>/dev/null || echo "0")
+  echo "${avail:-0}"
+}
+
+# LXC/Alpine 低内存时：建议 swap 或分批安装以降低 OOM 概率
+ensure_alpine_memory() {
+  local need_swap=256
+  local avail
+  avail=$(get_available_mem_mb)
+  if [[ "${avail}" -lt 350 ]] && [[ "${avail}" -gt 0 ]]; then
+    yellow "当前可用内存约 ${avail}MB，安装 Docker 可能被系统因内存不足而终止（OOM）。"
+    if ! grep -qE '^/dev/|swap' /proc/swaps 2>/dev/null; then
+      yellow "未检测到 swap。正在创建 ${need_swap}MB 的 swap 文件以降低 OOM 风险..."
+      if dd if=/dev/zero of=/tmp/tm_swap.img bs=1M count="${need_swap}" 2>/dev/null && \
+         chmod 600 /tmp/tm_swap.img && mkswap /tmp/tm_swap.img >/dev/null 2>&1 && swapon /tmp/tm_swap.img 2>/dev/null; then
+        green "已临时启用 ${need_swap}MB swap。安装完成后可执行: swapoff /tmp/tm_swap.img && rm -f /tmp/tm_swap.img"
+      else
+        red "创建 swap 失败。请宿主机为 LXC 增加内存（建议 ≥512MB）或在该容器内手动添加 swap 后重试。"
+        exit 1
+      fi
+    else
+      yellow "检测到已有 swap。若仍被 Killed，请为 LXC 分配更多内存（建议 ≥512MB）后重试。"
+    fi
+  fi
+}
+
 install_docker() {
   yellow "[1/6] 安装 Docker..."
   if command -v docker >/dev/null 2>&1; then
     green "Docker 已安装，跳过安装。"
   else
     if [[ "${OS_FAMILY}" == "alpine" ]]; then
+      ensure_alpine_memory
       apk update
-      apk add --no-cache docker docker-cli-compose curl
+      # 分批安装以降低单次 apk 内存占用，避免 LXC 小内存时被 OOM 杀死
+      apk add --no-cache curl || { red "安装 curl 失败（若被 Killed 多为内存不足，请增加 LXC 内存或添加 swap 后重试）"; exit 1; }
+      apk add --no-cache docker || { red "安装 docker 失败（若被 Killed 多为内存不足，请增加 LXC 内存或添加 swap 后重试）"; exit 1; }
+      apk add --no-cache docker-cli-compose || { red "安装 docker-cli-compose 失败"; exit 1; }
       start_docker_service
     else
       curl -fsSL https://get.docker.com | sh

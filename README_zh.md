@@ -49,6 +49,10 @@ curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-
 如果不传 `-t` 参数，也可以直接运行 `bash tm_lxc.sh`，脚本会提示你输入 token。
 脚本会自动识别系统：Debian/Ubuntu 使用 systemd，Alpine 使用 OpenRC。
 
+**LXC/Alpine 内存不足时**：若安装过程中进程被系统 **Killed**（多为内存不足 OOM），请任选其一：
+- 为 LXC 容器分配至少 **512MB 内存** 后重试；
+- 或在容器内先添加 **swap** 再运行脚本（脚本在检测到低内存且无 swap 时会尝试自动创建临时 swap）。
+
 ## 卸载
 
 ```shell
