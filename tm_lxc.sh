@@ -344,8 +344,12 @@ main() {
   detect_os
   parse_args "$@"
   try_download_binary
-  install_docker
-  fix_lxc_storage_driver
+  if [[ "${USE_LOCAL_BIN}" == "1" ]]; then
+    yellow "二进制模式：跳过 Docker 安装与存储驱动配置步骤。"
+  else
+    install_docker
+    fix_lxc_storage_driver
+  fi
   extract_binary
   create_service
   start_service
