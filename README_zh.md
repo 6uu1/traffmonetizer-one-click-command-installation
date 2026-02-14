@@ -49,6 +49,32 @@ curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-
 如果不传 `-t` 参数，也可以直接运行 `bash tm_lxc.sh`，脚本会提示你输入 token。
 脚本会自动识别系统：Debian/Ubuntu 使用 systemd，Alpine 使用 OpenRC。
 
+### LXC 小内存/无 Docker 场景（推荐本地二进制）
+
+如果你的 LXC 内存很小，或者 Docker daemon 在容器内不可用，可以直接使用本地二进制：
+
+```shell
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_lxc.sh -o tm_lxc.sh && chmod +x tm_lxc.sh
+# 把你提取好的二进制放在脚本同目录，名字为 traffmonetizer.bin
+bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k=
+```
+
+或者显式指定二进制路径：
+
+```shell
+bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k= -b /root/traffmonetizer.bin
+```
+
+现在 `tm_lxc.sh` 也支持**自动从 GitHub 下载二进制**（默认地址为仓库内的 `traffmonetizer.bin`）：
+- 若下载成功：直接使用该二进制并跳过 Docker；
+- 若下载失败：自动回退到 Docker 提取模式。
+
+如需自定义下载地址，可使用：
+
+```shell
+bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k= --binary-url https://example.com/traffmonetizer.bin
+```
+
 **LXC/Alpine 内存不足时**：若安装过程中进程被系统 **Killed**（多为内存不足 OOM），请任选其一：
 - 为 LXC 容器分配至少 **512MB 内存** 后重试；
 - 或在容器内先添加 **swap** 再运行脚本（脚本在检测到低内存且无 swap 时会尝试自动创建临时 swap）。
