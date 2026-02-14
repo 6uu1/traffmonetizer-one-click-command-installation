@@ -45,13 +45,14 @@ curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-
 
 Change to your token at the end of this command
 
-### LXC installation (extract binary + systemd)
+### LXC installation (extract binary + service auto-detection)
 
 ```shell
 curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_lxc.sh -o tm_lxc.sh && chmod +x tm_lxc.sh && bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k=
 ```
 
 If you do not pass `-t`, you can run `bash tm_lxc.sh` and enter the token interactively.
+The script auto-detects init system: systemd on Debian/Ubuntu, OpenRC on Alpine.
 
 ## Uninstall
 

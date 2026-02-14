@@ -40,13 +40,14 @@ curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-
 
 在此命令的最后更改为你的token
 
-### LXC 环境安装（提取二进制 + systemd）
+### LXC 环境安装（提取二进制 + 服务自动适配）
 
 ```shell
 curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_lxc.sh -o tm_lxc.sh && chmod +x tm_lxc.sh && bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k=
 ```
 
 如果不传 `-t` 参数，也可以直接运行 `bash tm_lxc.sh`，脚本会提示你输入 token。
+脚本会自动识别系统：Debian/Ubuntu 使用 systemd，Alpine 使用 OpenRC。
 
 ## 卸载
 
