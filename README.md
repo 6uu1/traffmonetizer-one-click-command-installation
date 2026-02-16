@@ -51,8 +51,85 @@ Change to your token at the end of this command
 curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_lxc.sh -o tm_lxc.sh && chmod +x tm_lxc.sh && bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k=
 ```
 
-If you do not pass `-t`, you can run `bash tm_lxc.sh` and enter the token interactively.
+If `-t` is not passed, just run `bash tm_lxc.sh` and it will ask for token interactively.
 The script auto-detects init system: systemd on Debian/Ubuntu, OpenRC on Alpine.
+
+### Low Memory / No Docker Scenarios (Local Binary)
+
+If your LXC has low memory, or Docker daemon is unavailable inside the container, you can use the local binary directly:
+
+```shell
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_lxc.sh -o tm_lxc.sh && chmod +x tm_lxc.sh
+# Place the traffmonetizer.bin in the same directory as the script
+bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k=
+```
+
+Or specify binary path explicitly:
+
+```shell
+bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k= -b /root/traffmonetizer.bin
+```
+
+The `tm_lxc.sh` now also supports **automatic binary download from GitHub** (defaults to the `traffmonetizer.bin` in this repo):
+- If download succeeds: use that binary and skip Docker
+- If download fails: fall back to Docker extraction mode
+
+To customize the download URL:
+
+```shell
+bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k= --binary-url https://example.com/traffmonetizer.bin
+```
+
+**Low memory in LXC/Alpine**: If the installation process gets **Killed** (usually OOM), choose one:
+- Allocate at least **512MB memory** to the LXC container and retry
+- Or add **swap** inside the container before running (script tries to create temporary swap if low memory detected)
+
+### Minimal Environment (No systemd / Docker-limited)
+
+For environments **without systemd** or with **Docker restrictions** (Docker containers, WSL2, Alpine containers, etc).
+
+#### Features
+- No Docker required, no systemd needed
+- Runs the binary directly
+- Includes start/stop/restart/status/logs commands
+- PID file and log management built-in
+
+#### Usage
+
+1. Download the simple script:
+
+```shell
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_simple.sh -o tm_simple.sh
+chmod +x tm_simple.sh
+```
+
+2. Start the service:
+
+```shell
+# Method 1: Pass token as argument
+./tm_simple.sh start YOUR_TOKEN
+
+# Method 2: Interactive token input
+./tm_simple.sh start
+```
+
+3. Common commands:
+
+```shell
+./tm_simple.sh status    # Check status
+./tm_simple.sh logs      # View real-time logs (tail -f)
+./tm_simple.sh stop      # Stop service
+./tm_simple.sh restart   # Restart service
+./tm_simple.sh help      # Show help
+```
+
+Log file defaults to `/tmp/traffmonetizer.log`, PID file at `/tmp/traffmonetizer.pid`.
+
+#### Notes
+- The script looks for `traffmonetizer.bin` in the current directory
+- To customize log/PID locations, edit `LOG_FILE` and `PID_FILE` variables
+- In container environments, consider using `nohup` or `screen`/`tmux` to keep session alive
+- After container restart, you need to manually restart (or add to container startup script)
 
 ## Uninstall
 
@@ -60,7 +137,7 @@ The script auto-detects init system: systemd on Debian/Ubuntu, OpenRC on Alpine.
 bash tm.sh -u
 ```
 
-uninstall service
+Uninstall service
 
 ## Experience
 
