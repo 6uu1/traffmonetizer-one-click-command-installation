@@ -79,6 +79,53 @@ bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k= --binary-url http
 - 为 LXC 容器分配至少 **512MB 内存** 后重试；
 - 或在容器内先添加 **swap** 再运行脚本（脚本在检测到低内存且无 swap 时会尝试自动创建临时 swap）。
 
+### 无系统服务环境（容器/WSL/简易部署）
+
+适用于 **无 systemd / Docker 受限** 的环境（如 Docker 容器、WSL2、 Alpine 容器等）。
+
+#### 特点
+- 无需 Docker，无需 systemd
+- 直接运行本地二进制文件
+- 支持后台运行、PID 文件、日志管理
+- 包含启动/停止/重启/状态/日志命令
+
+#### 使用方法
+
+1. 下载并运行简易脚本：
+
+```shell
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_simple.sh -o tm_simple.sh
+chmod +x tm_simple.sh
+```
+
+2. 启动服务：
+
+```shell
+# 方式 1: 直接传入 token
+./tm_simple.sh start YOUR_TOKEN
+
+# 方式 2: 交互式输入 token
+./tm_simple.sh start
+```
+
+3. 常用命令：
+
+```shell
+./tm_simple.sh status    # 查看运行状态
+./tm_simple.sh logs      # 查看实时日志（tail -f）
+./tm_simple.sh stop      # 停止服务
+./tm_simple.sh restart   # 重启服务
+./tm_simple.sh help      # 查看帮助
+```
+
+日志文件默认输出到 `/tmp/traffmonetizer.log`，PID 文件在 `/tmp/traffmonetizer.pid`。
+
+#### 注意事项
+- 该脚本会检测当前目录下的 `traffmonetizer.bin`，如果不存在会提示下载
+- 如需自定义日志路径或 PID 文件位置，可修改脚本中的 `LOG_FILE` 和 `PID_FILE` 变量
+- 在容器环境中，建议使用 `nohup` 或 `screen`/`tmux` 保持会话持久化
+- 重启容器后需要手动重新启动服务（或在容器启动脚本中添加自启动）
+
 ## 卸载
 
 ```shell
