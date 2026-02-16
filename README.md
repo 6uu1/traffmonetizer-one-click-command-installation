@@ -54,6 +54,66 @@ curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-
 If `-t` is not passed, just run `bash tm_lxc.sh` and it will ask for token interactively.
 The script auto-detects init system: systemd on Debian/Ubuntu, OpenRC on Alpine.
 
+### Minimal Environment + Daemon (No systemd/Docker)
+
+For environments **without systemd** or with **Docker restrictions** (Docker containers, WSL2, Alpine containers, etc).
+
+#### Features
+- No Docker required, no systemd needed
+- Runs the binary directly
+- Supports `start` (basic) and `daemon` (with auto-restart watchdog)
+- PID file and log management built-in
+- Simple shell script, no dependencies
+
+#### Usage
+
+1. Download the simple script:
+
+```shell
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_simple.sh -o tm_simple.sh
+chmod +x tm_simple.sh
+```
+
+2. Start the service (without watchdog):
+
+```shell
+./tm_simple.sh start YOUR_TOKEN
+```
+
+3. Or start with daemon mode (recommended for production):
+
+```shell
+./tm_simple.sh daemon YOUR_TOKEN
+```
+
+The daemon mode spawns a lightweight watchdog that checks every 30 seconds and auto-restarts the process if it crashes (up to 10 retries). Monitor logs: `/tmp/traffmonetizer_monitor.log`.
+
+#### Commands
+
+```shell
+./tm_simple.sh start [token]     # Start service (token optional if provided)
+./tm_simple.sh daemon [token]    # Start service + watchdog
+./tm_simple.sh stop              # Stop service + watchdog
+./tm_simple.sh stopmonitor       # Stop watchdog only
+./tm_simple.sh status            # Show status
+./tm_simple.sh logs              # Tail -f log file
+./tm_simple.sh restart [token]   # Restart (with watchdog)
+./tm_simple.sh help              # Show help
+```
+
+#### Files
+
+- Main log: `/tmp/traffmonetizer.log`
+- PID file: `/tmp/traffmonetizer.pid`
+- Watchdog log: `/tmp/traffmonetizer_monitor.log`
+- Watchdog PID: `/tmp/traffmonetizer_monitor.pid`
+
+#### Notes
+- The script expects `traffmonetizer.bin` in the same directory
+- For custom paths, edit `BIN_PATH` in the script
+- In containers/WSL, consider adding to startup scripts if persistence required
+- Watchdog interval: 30s, max restart attempts: 10
+
 ### Low Memory / No Docker Scenarios (Local Binary)
 
 If your LXC has low memory, or Docker daemon is unavailable inside the container, you can use the local binary directly:
@@ -83,53 +143,6 @@ bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k= --binary-url http
 **Low memory in LXC/Alpine**: If the installation process gets **Killed** (usually OOM), choose one:
 - Allocate at least **512MB memory** to the LXC container and retry
 - Or add **swap** inside the container before running (script tries to create temporary swap if low memory detected)
-
-### Minimal Environment (No systemd / Docker-limited)
-
-For environments **without systemd** or with **Docker restrictions** (Docker containers, WSL2, Alpine containers, etc).
-
-#### Features
-- No Docker required, no systemd needed
-- Runs the binary directly
-- Includes start/stop/restart/status/logs commands
-- PID file and log management built-in
-
-#### Usage
-
-1. Download the simple script:
-
-```shell
-curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_simple.sh -o tm_simple.sh
-chmod +x tm_simple.sh
-```
-
-2. Start the service:
-
-```shell
-# Method 1: Pass token as argument
-./tm_simple.sh start YOUR_TOKEN
-
-# Method 2: Interactive token input
-./tm_simple.sh start
-```
-
-3. Common commands:
-
-```shell
-./tm_simple.sh status    # Check status
-./tm_simple.sh logs      # View real-time logs (tail -f)
-./tm_simple.sh stop      # Stop service
-./tm_simple.sh restart   # Restart service
-./tm_simple.sh help      # Show help
-```
-
-Log file defaults to `/tmp/traffmonetizer.log`, PID file at `/tmp/traffmonetizer.pid`.
-
-#### Notes
-- The script looks for `traffmonetizer.bin` in the current directory
-- To customize log/PID locations, edit `LOG_FILE` and `PID_FILE` variables
-- In container environments, consider using `nohup` or `screen`/`tmux` to keep session alive
-- After container restart, you need to manually restart (or add to container startup script)
 
 ## Uninstall
 
