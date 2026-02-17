@@ -79,6 +79,51 @@ bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k= --binary-url http
 - 为 LXC 容器分配至少 **512MB 内存** 后重试；
 - 或在容器内先添加 **swap** 再运行脚本（脚本在检测到低内存且无 swap 时会尝试自动创建临时 swap）。
 
+---
+
+## 无系统服务环境（简易版 + 守护进程）
+
+如果你的环境甚至无法运行 LXC 脚本（例如某些受限的 Docker 容器、WSL2、或没有 systemd 的系统），可以直接使用本仓库提供的 `tm_simple.sh` 脚本：
+
+```shell
+# 1. 确保 traffmonetizer.bin 在同一目录
+chmod +x tm_simple.sh
+
+# 2. 启动服务（带守护进程自动重启）
+./tm_simple.sh daemon YOUR_TOKEN
+
+# 或者先 start 然后再手动守护
+./tm_simple.sh start YOUR_TOKEN
+```
+
+### 功能说明
+
+- `daemon` / `start-daemon`: 启动 TraffMonetizer 并附带独立监控器，每 30 秒检查一次进程状态，异常退出时自动重启（最多尝试 10 次）。
+- `start`: 仅启动主进程，无监控。
+- `stop`: 停止主进程和监控器。
+- `stopmonitor`: 只停止监控器。
+- `status`: 查看运行状态。
+- `logs`: 实时查看日志。
+- `restart`: 重启（带守护进程）。
+
+### 进程管理
+
+- 主进程 PID: `/tmp/traffmonetizer.pid`
+- 监控器 PID: `/tmp/traffmonetizer_monitor.pid`
+- 主日志: `/tmp/traffmonetizer.log`
+- 监控日志: `/tmp/traffmonetizer_monitor.log`
+
+监控器日志会记录每次重启的原因和上次 20 行日志，便于排查问题。
+
+### 适用场景
+
+- Docker 容器（无 systemd）
+- WSL2
+- Alpine 容器（无 OpenRC）
+- 任何 shell 可用的受限环境
+
+---
+
 ## 卸载
 
 ```shell
