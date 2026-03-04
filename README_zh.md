@@ -96,6 +96,27 @@ chmod +x tm_simple.sh
 ./tm_simple.sh start YOUR_TOKEN
 ```
 
+#### 使用方法
+
+1. 下载脚本：
+
+```shell
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_simple.sh -o tm_simple.sh
+chmod +x tm_simple.sh
+```
+
+2. 启动服务（若当前目录没有 `traffmonetizer.bin`，脚本会自动从 GitHub 下载）：
+
+```shell
+./tm_simple.sh start YOUR_TOKEN
+```
+
+3. 或使用守护进程模式（推荐）：
+
+```shell
+./tm_simple.sh daemon YOUR_TOKEN
+```
+
 ### 功能说明
 
 - `daemon` / `start-daemon`: 启动 TraffMonetizer 并附带独立监控器，每 30 秒检查一次进程状态，异常退出时自动重启（最多尝试 10 次）。

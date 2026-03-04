@@ -14,18 +14,48 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 BIN_PATH="./traffmonetizer.bin"
+BIN_URL="https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/traffmonetizer.bin"
 PID_FILE="/tmp/traffmonetizer.pid"
 LOG_FILE="/tmp/traffmonetizer.log"
 MONITOR_PID_FILE="/tmp/traffmonetizer_monitor.pid"
 MONITOR_LOG_FILE="/tmp/traffmonetizer_monitor.log"
+TOKEN=""
 
 # ---------- 基础函数 ----------
 check_binary() {
     if [[ ! -f "$BIN_PATH" ]]; then
-        echo -e "${RED}错误: 未找到 traffmonetizer.bin${NC}" >&2
-        exit 1
+        echo -e "${YELLOW}未找到 traffmonetizer.bin，尝试从 GitHub 下载...${NC}"
+        
+        # 检查下载工具
+        if command -v curl &>/dev/null; then
+            if curl -fL --connect-timeout 15 --retry 3 --retry-delay 2 "$BIN_URL" -o "$BIN_PATH"; then
+                chmod +x "$BIN_PATH"
+                echo -e "${GREEN}✓ 二进制文件下载成功${NC}"
+            else
+                echo -e "${RED}错误: 下载失败，请手动下载 traffmonetizer.bin${NC}"
+                echo "下载地址: $BIN_URL"
+                exit 1
+            fi
+        elif command -v wget &>/dev/null; then
+            if wget -T 15 -t 3 -O "$BIN_PATH" "$BIN_URL"; then
+                chmod +x "$BIN_PATH"
+                echo -e "${GREEN}✓ 二进制文件下载成功${NC}"
+            else
+                echo -e "${RED}错误: 下载失败，请手动下载 traffmonetizer.bin${NC}"
+                echo "下载地址: $BIN_URL"
+                exit 1
+            fi
+        else
+            echo -e "${RED}错误: 需要 curl 或 wget 来下载二进制文件${NC}"
+            echo "请安装 curl 或 wget，或手动下载 traffmonetizer.bin 到当前目录"
+            echo "下载地址: $BIN_URL"
+            exit 1
+        fi
     fi
-    chmod +x "$BIN_PATH" 2>/dev/null || true
+    
+    if [[ ! -x "$BIN_PATH" ]]; then
+        chmod +x "$BIN_PATH"
+    fi
 }
 
 is_running() {
