@@ -74,7 +74,7 @@ curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-
 chmod +x tm_simple.sh
 ```
 
-2. Start the service (without watchdog):
+2. Start the service (the script will auto-download `traffmonetizer.bin` from GitHub if not present):
 
 ```shell
 ./tm_simple.sh start YOUR_TOKEN
