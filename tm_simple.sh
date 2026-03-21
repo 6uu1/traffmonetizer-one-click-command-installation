@@ -1,5 +1,5 @@
 #!/bin/bash
-# TraffMonetizer 简易运行脚本
+# TraffMonetizer 简易运行脚本 (支持自动下载二进制)
 # 适用于：无 systemd / Docker 受限环境（如容器、WSL、部分 VPS）
 # 直接使用本地二进制文件运行，无需 Docker
 
@@ -19,14 +19,67 @@ BIN_PATH="./traffmonetizer.bin"
 PID_FILE="/tmp/traffmonetizer.pid"
 LOG_FILE="/tmp/traffmonetizer.log"
 TOKEN=""
+REMOTE_BIN_URL="https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/traffmonetizer.bin"
+
+# 确保有下载工具
+ensure_download_tool() {
+    if command -v curl >/dev/null 2>&1 || command -v wget >/dev/null 2>&1; then
+        return
+    fi
+    echo -e "${YELLOW}未检测到 curl/wget，正在安装 curl...${NC}"
+    if command -v apt >/dev/null 2>&1; then
+        apt update && apt install -y curl
+    elif command -v apk >/dev/null 2>&1; then
+        apk update && apk add --no-cache curl
+    elif command -v yum >/dev/null 2>&1; then
+        yum install -y curl
+    else
+        echo -e "${RED}无法安装 curl，请手动安装 curl 或 wget${NC}"
+        exit 1
+    fi
+}
+
+# 尝试从 GitHub 下载二进制
+try_download_binary() {
+    if [[ -f "$BIN_PATH" ]]; then
+        return
+    fi
+
+    echo -e "${YELLOW}未找到本地二进制，尝试从 GitHub 下载...${NC}"
+    ensure_download_tool
+
+    if command -v curl >/dev/null 2>&1; then
+        if curl -fL --connect-timeout 15 --retry 3 --retry-delay 2 "$REMOTE_BIN_URL" -o "$BIN_PATH"; then
+            chmod +x "$BIN_PATH"
+            echo -e "${GREEN}✓ 已从 GitHub 下载二进制${NC}"
+            return
+        fi
+    elif command -v wget >/dev/null 2>&1; then
+        if wget -T 15 -t 3 -O "$BIN_PATH" "$REMOTE_BIN_URL"; then
+            chmod +x "$BIN_PATH"
+            echo -e "${GREEN}✓ 已从 GitHub 下载二进制${NC}"
+            return
+        fi
+    fi
+
+    echo -e "${RED}✗ 从 GitHub 下载失败${NC}"
+    return 1
+}
 
 # 检查二进制文件
 check_binary() {
+    # 如果本地不存在，尝试下载
+    if [[ ! -f "$BIN_PATH" ]]; then
+        try_download_binary
+    fi
+
+    # 再次检查
     if [[ ! -f "$BIN_PATH" ]]; then
         echo -e "${RED}错误: 未找到 traffmonetizer.bin${NC}"
-        echo "请确保二进制文件在当前目录"
+        echo "请确保二进制文件在当前目录，或检查网络连接"
         exit 1
     fi
+
     if [[ ! -x "$BIN_PATH" ]]; then
         chmod +x "$BIN_PATH"
     fi
@@ -160,6 +213,7 @@ TraffMonetizer 简易运行脚本
   $0 logs
 
 注意: 此脚本适用于无 systemd 的环境（如 Docker 容器、WSL 等）
+      会自动从 GitHub 下载二进制文件（如果本地不存在）
 EOF
 }
 
