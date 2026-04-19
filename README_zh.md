@@ -1,130 +1,121 @@
-# traffmonetizer-一键式命令安装
+# Traffmonetizer 一键安装脚本
+
+[English](README.md) | [中文文档](README_zh.md)
 
 ## 介绍
-traffmonetizer 是一个允许用户通过分享流量来赚钱的平台。(被动收入)
 
-您共享的 1G 流量将获得 0.10 美元，并且此脚本支持数据中心网络或家庭带宽。
+[Traffmonetizer](https://traffmonetizer.com/?aff=986423) 是一个通过分享闲置带宽赚取被动收入的平台。
 
-这是**全网第一个**自动安装依赖并拉取安装最新docker的**一键安装脚本**，脚本会根据平台更新不断完善。
+每分享 **1GB 流量可获得 $0.10**，支持数据中心网络和家庭带宽。
 
-它具有以下特点：
+这是**全网第一个一键安装脚本**，自动安装所有依赖并部署最新 Docker 镜像。主要特点：
 
-1.根据系统自动安装docker，如果已经安装了docker，则不再安装。
+- 自动安装 Docker（已安装则跳过）
+- 根据系统架构自动选择正确的 Docker 镜像
+- 通过 [Watchtower](https://containrrr.dev/watchtower/) 自动更新镜像，无需手动操作
 
-2.根据架构自动选择和构建拉取的docker镜像，无需您手动修改官方案例安装。
-    
-3.使用Watchtower进行镜像自动更新，无需手动更新和重新输入参数。
+> **已验证平台：** AMD64 和 ARM 架构
 
-(Watchtower 是一款实现自动化更新 Docker 镜像与容器的实用工具.它监控着所有正在运行的容器以及相关镜像,当检测本地镜像与镜像仓库中的镜像有差异时,会自动拉取最新镜像并使用最初部署时的参数重新启动相应的容器.)
+## 快速开始
 
-### 信息
+前往 [traffmonetizer.com](https://traffmonetizer.com/?aff=986423) 注册（获得 $5 奖励），然后从控制台复制你的 Token。
 
-- 本项目已经在 AMD64 和 ARM 上验证上测试通过
-- 感兴趣可以尝试一下，[注册链接点我](https://traffmonetizer.com/?aff=986423), 走我链接注册你获得5刀的注册奖励。
+根据你的环境选择安装方式：
+
+| 环境 | 脚本 | 需要 Docker |
+|------|------|:-----------:|
+| 普通 VPS / 服务器 | `tm.sh` | 是 |
+| LXC 容器 | `tm_lxc.sh` | 可选 |
+| Docker 容器 / WSL2 / 无 systemd | `tm_simple.sh` | 否 |
 
 ## 安装
 
-### 交互式安装
+### 方式一：标准安装（Docker） — `tm.sh`
+
+适用于：**普通 VPS、独立服务器、云主机**
+
+#### 交互式安装
 
 ```shell
 curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm.sh -o tm.sh && chmod +x tm.sh && bash tm.sh
 ```
 
-注册链接注册后，复制左上角的token，运行此命令，粘贴token，回车，即可开始安装。
+脚本会提示你输入 Token。
 
-### 一键安装
-
-```shell
-curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm.sh -o tm.sh && chmod +x tm.sh && bash tm.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k=
-```
-
-在此命令的最后更改为你的token
-
-### LXC 环境安装（提取二进制 + 服务自动适配）
+#### 一键安装
 
 ```shell
-curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_lxc.sh -o tm_lxc.sh && chmod +x tm_lxc.sh && bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k=
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm.sh -o tm.sh && chmod +x tm.sh && bash tm.sh -t YOUR_TOKEN
 ```
 
-如果不传 `-t` 参数，也可以直接运行 `bash tm_lxc.sh`，脚本会提示你输入 token。
-脚本会自动识别系统：Debian/Ubuntu 使用 systemd，Alpine 使用 OpenRC。
+将 `YOUR_TOKEN` 替换为你的实际 Token。
 
-### LXC 小内存/无 Docker 场景（推荐本地二进制）
+---
 
-如果你的 LXC 内存很小，或者 Docker daemon 在容器内不可用，可以直接使用本地二进制：
+### 方式二：LXC 容器安装 — `tm_lxc.sh`
+
+适用于：**LXC/LXD 容器**（Proxmox 等）
+
+脚本自动识别系统：Debian/Ubuntu 使用 systemd，Alpine 使用 OpenRC。
 
 ```shell
-curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_lxc.sh -o tm_lxc.sh && chmod +x tm_lxc.sh
-# 把你提取好的二进制放在脚本同目录，名字为 traffmonetizer.bin
-bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k=
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_lxc.sh -o tm_lxc.sh && chmod +x tm_lxc.sh && bash tm_lxc.sh -t YOUR_TOKEN
 ```
 
-或者显式指定二进制路径：
+不传 `-t` 参数则进入交互式输入。
+
+#### 二进制模式（小内存 / 无 Docker）
+
+脚本支持不依赖 Docker，直接使用二进制运行：
 
 ```shell
-bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k= -b /root/traffmonetizer.bin
+# 自动从 GitHub 下载二进制（默认行为）
+bash tm_lxc.sh -t YOUR_TOKEN
+
+# 指定本地二进制文件
+bash tm_lxc.sh -t YOUR_TOKEN -b /path/to/traffmonetizer.bin
+
+# 自定义下载地址
+bash tm_lxc.sh -t YOUR_TOKEN --binary-url https://example.com/traffmonetizer.bin
 ```
 
-现在 `tm_lxc.sh` 也支持**自动从 GitHub 下载二进制**（默认地址为仓库内的 `traffmonetizer.bin`）：
-- 若下载成功：直接使用该二进制并跳过 Docker；
-- 若下载失败：自动回退到 Docker 提取模式。
+**优先级：** 本地二进制 > 从 GitHub 下载 > Docker 提取
 
-如需自定义下载地址，可使用：
+> **内存不足提示：** 如果安装过程中进程被 **Killed**（OOM），请选择：
+> - 为 LXC 容器分配至少 **512MB** 内存后重试
+> - 或先添加 swap 再运行（脚本检测到低内存时会尝试自动创建临时 swap）
+
+---
+
+### 方式三：极简安装（无 Docker / 无 systemd） — `tm_simple.sh`
+
+适用于：**Docker 容器、WSL2、Alpine 容器**，以及任何没有 systemd 或 Docker 的环境。
+
+特点：无需 Docker，无需 systemd，内置进程管理（启动/停止/重启/状态/日志）。
+
+#### 下载
 
 ```shell
-bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k= --binary-url https://example.com/traffmonetizer.bin
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_simple.sh -o tm_simple.sh && chmod +x tm_simple.sh
 ```
 
-**LXC/Alpine 内存不足时**：若安装过程中进程被系统 **Killed**（多为内存不足 OOM），请任选其一：
-- 为 LXC 容器分配至少 **512MB 内存** 后重试；
-- 或在容器内先添加 **swap** 再运行脚本（脚本在检测到低内存且无 swap 时会尝试自动创建临时 swap）。
-
-### 无系统服务环境（容器/WSL/简易部署）
-
-适用于 **无 systemd / Docker 受限** 的环境（如 Docker 容器、WSL2、 Alpine 容器等）。
-
-#### 特点
-- 无需 Docker，无需 systemd
-- 直接运行本地二进制文件
-- 支持后台运行、PID 文件、日志管理
-- 包含启动/停止/重启/状态/日志命令
-
-#### 使用方法
-
-1. 下载并运行简易脚本：
+#### 使用
 
 ```shell
-curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_simple.sh -o tm_simple.sh
-chmod +x tm_simple.sh
+./tm_simple.sh start YOUR_TOKEN   # 启动（带 Token）
+./tm_simple.sh start              # 启动（交互式输入 Token）
+./tm_simple.sh status             # 查看运行状态
+./tm_simple.sh logs               # 查看实时日志
+./tm_simple.sh stop               # 停止服务
+./tm_simple.sh restart            # 重启服务
+./tm_simple.sh help               # 查看帮助
 ```
 
-2. 启动服务：
-
-```shell
-# 方式 1: 直接传入 token
-./tm_simple.sh start YOUR_TOKEN
-
-# 方式 2: 交互式输入 token
-./tm_simple.sh start
-```
-
-3. 常用命令：
-
-```shell
-./tm_simple.sh status    # 查看运行状态
-./tm_simple.sh logs      # 查看实时日志（tail -f）
-./tm_simple.sh stop      # 停止服务
-./tm_simple.sh restart   # 重启服务
-./tm_simple.sh help      # 查看帮助
-```
-
-日志文件默认输出到 `/tmp/traffmonetizer.log`，PID 文件在 `/tmp/traffmonetizer.pid`。
-
-#### 注意事项
-- 该脚本会检测当前目录下的 `traffmonetizer.bin`，如果不存在会提示下载
-- 如需自定义日志路径或 PID 文件位置，可修改脚本中的 `LOG_FILE` 和 `PID_FILE` 变量
-- 在容器环境中，建议使用 `nohup` 或 `screen`/`tmux` 保持会话持久化
-- 重启容器后需要手动重新启动服务（或在容器启动脚本中添加自启动）
+> **注意事项：**
+> - 需要当前目录下存在 `traffmonetizer.bin`，不存在时会提示下载
+> - 日志文件：`/tmp/traffmonetizer.log`，PID 文件：`/tmp/traffmonetizer.pid`
+> - 容器环境建议使用 `nohup` 或 `screen`/`tmux` 保持会话
+> - 容器重启后需手动重启服务，或添加到容器启动脚本中
 
 ## 卸载
 
@@ -132,24 +123,27 @@ chmod +x tm_simple.sh
 bash tm.sh -u
 ```
 
-卸载服务
+## 收益参考
 
-### 经验
+单 IP 日收益（仅供参考）：
 
-单IP挂国外，欧洲区日收入0.010~0.015美元，美区估计会多点，单IP每天0.013以上不超过0.016吧。
+| 地区 | 每日收入（单 IP） |
+|------|-------------------|
+| 欧洲 | $0.010 – $0.015 |
+| 美国 | $0.013 – $0.020 |
 
-**僧多粥少，人越多，收益越低**
+> 人越多，收益越低。
 
 ![](https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/backup/a.png)
 
 ![](https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/backup/b.png)
 
-2022.05 末尾就大幅度减少收益了，之前一天有0.025美元以上的。(本脚本在平台适配了linux的第15天创建)
+2022.05 之后收益大幅下降，之前单 IP 每天有 $0.025 以上。（本脚本在平台适配 Linux 后第 15 天创建）
 
-注意，该项目提现前不要随意更换提现方式，因为提现方式切换可能会损失掉部分积攒的额度
+> **提示：** 提现前不要随意切换提现方式，切换可能导致部分已积攒额度丢失。
 
-### 免责声明
+## 免责声明
 
-本程序仅供学习了解, 非盈利目的，请于下载后 24 小时内删除, 不得用作任何商业用途, 文字、数据及图片均有所属版权, 如转载须注明来源。
+本程序仅供学习了解，非盈利目的，请于下载后 24 小时内删除，不得用作任何商业用途。文字、数据及图片均有所属版权，如转载须注明来源。
 
-使用本程序必循遵守部署免责声明。使用本程序必循遵守部署服务器所在地、所在国家和用户所在国家的法律法规, 程序作者不对使用者任何不当行为负责.
+使用本程序须遵守部署服务器所在地、所在国家和用户所在国家的法律法规，程序作者不对使用者任何不当行为负责。

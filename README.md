@@ -1,135 +1,119 @@
-# traffmonetizer-one-click-command-installation
-
-## Language
+# Traffmonetizer One-Click Installation
 
 [English](README.md) | [中文文档](README_zh.md)
 
-## **Introduction**
+## Introduction
 
-The traffmonetizer is an option that allows users to earn money by sharing your traffic.
+[Traffmonetizer](https://traffmonetizer.com/?aff=986423) allows you to earn passive income by sharing your unused bandwidth.
 
-You'll receive $0.10 for the 1G traffic you share, and this script supports data center network or home bandwidth.
+You earn **$0.10 per 1GB** of traffic shared, supporting both data center and home networks.
 
-This is the **first one-click installation script of the whole network** to automatically install dependencies and pull and install the latest docker, and the script will continue to be improved according to the platform update.
+This is the **first one-click installation script** that automatically handles all dependencies and Docker setup. Key features:
 
-It has below features:
+- Auto-installs Docker if not already present (skips if installed)
+- Auto-selects the correct Docker image based on system architecture
+- Auto-updates via [Watchtower](https://containrrr.dev/watchtower/) — no manual image pulls needed
 
-1. Automatically install docker based on the system, and if docker are already installed, it will not installed again.
+> **Tested on:** AMD64 and ARM architectures
 
-2. Automatically select and build the pulled docker image according to the architecture, without the need for you to manually modify the official case.
+## Quick Start
 
-3. Use Watchtower for automatic mirror update without manual update and re-entry of parameters.
+Register at [traffmonetizer.com](https://traffmonetizer.com/?aff=986423) (get $5 bonus), then copy your token from the dashboard.
 
-(Watchtower is a utility that automates the updating of Docker images and containers. It monitors all running containers and related images, and automatically pulls the latest image and uses parameters when initially deployed to restart the corresponding container.)
+Choose an installation method below based on your environment:
 
-## Notes
+| Environment | Script | Docker Required |
+|-------------|--------|:---------------:|
+| Standard VPS / Server | `tm.sh` | Yes |
+| LXC Container | `tm_lxc.sh` | Optional |
+| Docker / WSL2 / No systemd | `tm_simple.sh` | No |
 
-- Verified on AMD64 and ARM
-- Try it if you are interested via my --> [referrals](https://traffmonetizer.com/?aff=986423) <--, you will get 5 dollar.
+## Installation
 
-## Install
+### Method 1: Standard (Docker-based) — `tm.sh`
 
-### Interactive installation
+Best for: **regular VPS, dedicated servers, cloud instances**
+
+#### Interactive
 
 ```shell
 curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm.sh -o tm.sh && chmod +x tm.sh && bash tm.sh
 ```
 
-After the registration link is registered, copy the token in the upper left corner, run my script, paste the token, and press Enter to start the installation.
+The script will prompt you to enter your token.
 
-### One command installation
-
-```shell
-curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm.sh -o tm.sh && chmod +x tm.sh && bash tm.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k=
-```
-
-Change to your token at the end of this command
-
-### LXC installation (extract binary + service auto-detection)
+#### One-command
 
 ```shell
-curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_lxc.sh -o tm_lxc.sh && chmod +x tm_lxc.sh && bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k=
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm.sh -o tm.sh && chmod +x tm.sh && bash tm.sh -t YOUR_TOKEN
 ```
 
-If `-t` is not passed, just run `bash tm_lxc.sh` and it will ask for token interactively.
-The script auto-detects init system: systemd on Debian/Ubuntu, OpenRC on Alpine.
+Replace `YOUR_TOKEN` with your actual token.
 
-### Low Memory / No Docker Scenarios (Local Binary)
+---
 
-If your LXC has low memory, or Docker daemon is unavailable inside the container, you can use the local binary directly:
+### Method 2: LXC Container — `tm_lxc.sh`
+
+Best for: **LXC/LXD containers** (Proxmox, etc.)
+
+Auto-detects init system: systemd (Debian/Ubuntu) or OpenRC (Alpine).
 
 ```shell
-curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_lxc.sh -o tm_lxc.sh && chmod +x tm_lxc.sh
-# Place the traffmonetizer.bin in the same directory as the script
-bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k=
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_lxc.sh -o tm_lxc.sh && chmod +x tm_lxc.sh && bash tm_lxc.sh -t YOUR_TOKEN
 ```
 
-Or specify binary path explicitly:
+Omit `-t` to enter token interactively.
+
+#### Binary mode (low memory / no Docker)
+
+The script supports running without Docker by using the binary directly:
 
 ```shell
-bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k= -b /root/traffmonetizer.bin
+# Auto-download binary from GitHub (default behavior)
+bash tm_lxc.sh -t YOUR_TOKEN
+
+# Or specify a local binary
+bash tm_lxc.sh -t YOUR_TOKEN -b /path/to/traffmonetizer.bin
+
+# Or specify a custom download URL
+bash tm_lxc.sh -t YOUR_TOKEN --binary-url https://example.com/traffmonetizer.bin
 ```
 
-The `tm_lxc.sh` now also supports **automatic binary download from GitHub** (defaults to the `traffmonetizer.bin` in this repo):
-- If download succeeds: use that binary and skip Docker
-- If download fails: fall back to Docker extraction mode
+**Priority:** local binary > download from GitHub > Docker extraction
 
-To customize the download URL:
+> **Low memory tip:** If the process gets **Killed** (OOM), either allocate at least **512MB** memory to the container, or add swap before running (the script auto-creates temporary swap when low memory is detected).
+
+---
+
+### Method 3: Minimal (No Docker / No systemd) — `tm_simple.sh`
+
+Best for: **Docker containers, WSL2, Alpine containers**, or any environment without systemd or Docker access.
+
+Features: no Docker needed, no systemd needed, built-in process management with start/stop/restart/status/logs.
+
+#### Setup
 
 ```shell
-bash tm_lxc.sh -t XhRgiD9yuG+0wUe295CCwi5s3qLejoaYnLC3IkqJB1k= --binary-url https://example.com/traffmonetizer.bin
+curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_simple.sh -o tm_simple.sh && chmod +x tm_simple.sh
 ```
-
-**Low memory in LXC/Alpine**: If the installation process gets **Killed** (usually OOM), choose one:
-- Allocate at least **512MB memory** to the LXC container and retry
-- Or add **swap** inside the container before running (script tries to create temporary swap if low memory detected)
-
-### Minimal Environment (No systemd / Docker-limited)
-
-For environments **without systemd** or with **Docker restrictions** (Docker containers, WSL2, Alpine containers, etc).
-
-#### Features
-- No Docker required, no systemd needed
-- Runs the binary directly
-- Includes start/stop/restart/status/logs commands
-- PID file and log management built-in
 
 #### Usage
 
-1. Download the simple script:
-
 ```shell
-curl -L https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/tm_simple.sh -o tm_simple.sh
-chmod +x tm_simple.sh
+./tm_simple.sh start YOUR_TOKEN   # Start with token
+./tm_simple.sh start              # Start (interactive token input)
+./tm_simple.sh status             # Check status
+./tm_simple.sh logs               # View real-time logs
+./tm_simple.sh stop               # Stop service
+./tm_simple.sh restart            # Restart service
+./tm_simple.sh help               # Show help
 ```
 
-2. Start the service:
-
-```shell
-# Method 1: Pass token as argument
-./tm_simple.sh start YOUR_TOKEN
-
-# Method 2: Interactive token input
-./tm_simple.sh start
-```
-
-3. Common commands:
-
-```shell
-./tm_simple.sh status    # Check status
-./tm_simple.sh logs      # View real-time logs (tail -f)
-./tm_simple.sh stop      # Stop service
-./tm_simple.sh restart   # Restart service
-./tm_simple.sh help      # Show help
-```
-
-Log file defaults to `/tmp/traffmonetizer.log`, PID file at `/tmp/traffmonetizer.pid`.
-
-#### Notes
-- The script looks for `traffmonetizer.bin` in the current directory
-- To customize log/PID locations, edit `LOG_FILE` and `PID_FILE` variables
-- In container environments, consider using `nohup` or `screen`/`tmux` to keep session alive
-- After container restart, you need to manually restart (or add to container startup script)
+> **Notes:**
+> - Requires `traffmonetizer.bin` in the current directory
+> - Log file: `/tmp/traffmonetizer.log`, PID file: `/tmp/traffmonetizer.pid`
+> - In container environments, use `nohup` or `screen`/`tmux` to keep the session alive
+> - After container restart, manually restart the service or add to startup script
 
 ## Uninstall
 
@@ -137,15 +121,16 @@ Log file defaults to `/tmp/traffmonetizer.log`, PID file at `/tmp/traffmonetizer
 bash tm.sh -u
 ```
 
-Uninstall service
+## Earnings Reference
 
-## Experience
+Single IP daily income (for reference only):
 
-For a single IP, the daily income in Europe is 0.010~0.015 US dollars. 
+| Region | Daily Income (per IP) |
+|--------|----------------------|
+| Europe | $0.010 – $0.015 |
+| US | $0.013 – $0.020 |
 
-It is estimated that there will be more in the United States. The daily income of a single IP is more than 0.013 and not more than 0.02.
-
-**More monks and less porridge, the more people, the lower the income**
+> The more users there are, the lower individual earnings become.
 
 ![](https://raw.githubusercontent.com/6uu1/traffmonetizer-one-click-command-installation/main/backup/a.png)
 
@@ -153,6 +138,6 @@ It is estimated that there will be more in the United States. The daily income o
 
 ## Disclaimer
 
-This program is for learning purposes only, not for profit, please delete it within 24 hours after downloading, not for any commercial use. The text, data and images are copyrighted, if reproduced, please indicate the source.
+This program is for educational purposes only. Please delete within 24 hours of download. Not for commercial use. Text, data, and images are copyrighted — cite the source if reproduced.
 
-Use of this program is subject to the deployment disclaimer. Use of this program is subject to the laws and regulations of the country where the server is deployed, the country where it is located, and the country where the user is located, and the author of the program is not responsible for any misconduct of the user.
+Usage is subject to the laws and regulations of the server's location, the deployer's country, and the user's country. The author assumes no responsibility for any misuse.
